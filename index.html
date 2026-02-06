@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My D-day</title>
+    <style>
+        :root {
+            --neu-bg: #e0e5ec;
+            --neu-light: #ffffff;
+            --neu-dark: #a3b1c6;
+            --neu-shadow: 9px 9px 16px rgba(163, 177, 198, 0.6), -9px -9px 16px rgba(255, 255, 255, 0.5);
+            --neu-shadow-sm: 5px 5px 10px rgba(163, 177, 198, 0.5), -5px -5px 10px rgba(255, 255, 255, 0.5);
+            --neu-shadow-xs: 3px 3px 6px rgba(163, 177, 198, 0.45), -3px -3px 6px rgba(255, 255, 255, 0.45);
+            --neu-inset: inset 4px 4px 8px rgba(163, 177, 198, 0.5), inset -4px -4px 8px rgba(255, 255, 255, 0.6);
+            --neu-inset-sm: inset 2px 2px 5px rgba(163, 177, 198, 0.4), inset -2px -2px 5px rgba(255, 255, 255, 0.5);
+            --text-primary: #3a4556;
+            --text-secondary: #6b7a8d;
+            --text-muted: #8895a7;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "SF Pro Display", "Inter", sans-serif;
+        }
+
+        * { box-sizing: border-box; font-family: var(--font-family); letter-spacing: -0.01em; }
+        html, body { margin: 0; padding: 0; }
+        body { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--neu-bg); padding: 20px; transition: background 0.3s; }
+
+        /* Main Layout Container */
+        .main-container {
+            display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 40px;
+            width: 100%; max-width: 800px;
+        }
+        @media (max-width: 720px), (max-aspect-ratio: 4/5) {
+            .main-container { flex-direction: column; gap: 25px; }
+        }
+
+        /* Onboarding Window - Neumorphism */
+        .window {
+            width: 100%; max-width: 420px; background: var(--neu-bg); border-radius: 24px;
+            box-shadow: var(--neu-shadow); overflow: hidden;
+            border: none; display: flex; flex-direction: column;
+            z-index: 10; flex-shrink: 0;
+        }
+        .title-bar {
+            height: 54px; background: var(--neu-bg); display: flex; align-items: center; padding: 0 18px;
+            border-bottom: 1px solid rgba(163, 177, 198, 0.25);
+        }
+        .dots { display: flex; gap: 7px; flex: 1; }
+        .dot {
+            width: 11px; height: 11px; border-radius: 50%;
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1), 1px 1px 2px rgba(255,255,255,0.5);
+        }
+        .dot.red { background: #d4a0a0; } .dot.yellow { background: #d4d4a0; } .dot.green { background: #a0c8a0; }
+        .bar-title { font-size: 13px; font-weight: 700; color: var(--text-primary); flex: 2; text-align: center; letter-spacing: 0.05em; }
+        .nav-controls { flex: 1; display: flex; justify-content: flex-end; gap: 10px; }
+
+        .content { padding: 30px 25px; min-height: 280px; position: relative; overflow-y: auto; }
+        .step { display: none; animation: fadeUp 0.3s ease; }
+        .step.active { display: block; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        h1 { font-size: 20px; font-weight: 800; margin: 0 0 8px; color: var(--text-primary); }
+        p { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.4; }
+
+        /* Form Elements - Neumorphism Inset */
+        input[type="text"], input[type="date"], select, textarea {
+            width: 100%; padding: 12px 14px; border-radius: 12px; border: none;
+            background: var(--neu-bg); outline: none; font-size: 13px; margin-bottom: 10px;
+            transition: all 0.3s ease; color: var(--text-primary);
+            box-shadow: var(--neu-inset-sm);
+            -webkit-appearance: none; appearance: none;
+        }
+        textarea { height: 80px; resize: none; }
+        select {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7a8d' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 14px center;
+            padding-right: 36px;
+        }
+        input[type="text"]:focus, input[type="date"]:focus, textarea:focus, select:focus {
+            box-shadow: inset 3px 3px 6px rgba(163, 177, 198, 0.55), inset -3px -3px 6px rgba(255, 255, 255, 0.65);
+        }
+        input::placeholder, textarea::placeholder { color: #9ba8b8; }
+
+        /* Color Picker - Neumorphism raised */
+        input[type="color"] {
+            width: 50px; height: 40px; border: none; padding: 4px; cursor: pointer;
+            border-radius: 12px; background: var(--neu-bg);
+            box-shadow: var(--neu-shadow-sm);
+            -webkit-appearance: none; appearance: none;
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 3px; }
+        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 8px; }
+
+        /* Range Slider - Neumorphism track */
+        input[type="range"] {
+            -webkit-appearance: none; appearance: none;
+            width: 100%; height: 8px; border-radius: 4px; outline: none; cursor: pointer;
+            background: var(--neu-bg);
+            box-shadow: var(--neu-inset-sm);
+            margin: 10px 0; border: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none;
+            width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+            background: var(--neu-bg);
+            box-shadow: var(--neu-shadow-xs);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 22px; height: 22px; border-radius: 50%; border: none; cursor: pointer;
+            background: var(--neu-bg);
+            box-shadow: var(--neu-shadow-xs);
+        }
+
+        /* File Input - Neumorphism */
+        input[type="file"] {
+            width: 100%; padding: 12px 14px; border-radius: 12px; border: none;
+            background: var(--neu-bg); font-size: 12px; margin-bottom: 10px;
+            box-shadow: var(--neu-inset-sm); cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        /* Checkbox - Neumorphism */
+        input[type="checkbox"] {
+            -webkit-appearance: none; appearance: none;
+            width: 18px !important; height: 18px !important; border-radius: 6px; cursor: pointer;
+            background: var(--neu-bg); border: none; position: relative;
+            box-shadow: var(--neu-inset-sm);
+            transition: all 0.2s ease; flex-shrink: 0;
+            padding: 0 !important; margin: 0 !important;
+        }
+        input[type="checkbox"]:checked {
+            box-shadow: var(--neu-inset);
+        }
+        input[type="checkbox"]:checked::after {
+            content: '✓'; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); font-size: 11px; font-weight: 700; color: var(--text-primary);
+        }
+
+        .label-text { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.05em; }
+
+        /* Navigation Buttons - Neumorphism */
+        .nav-btn {
+            background: var(--neu-bg); border: none; cursor: pointer; color: var(--text-primary);
+            transition: all 0.2s ease; padding: 7px; display: flex; align-items: center; justify-content: center;
+            border-radius: 10px; box-shadow: var(--neu-shadow-xs);
+        }
+        .nav-btn:hover { box-shadow: 2px 2px 4px rgba(163, 177, 198, 0.5), -2px -2px 4px rgba(255, 255, 255, 0.5); }
+        .nav-btn:active { box-shadow: var(--neu-inset-sm); }
+        .nav-btn:disabled { opacity: 0.25; cursor: default; box-shadow: none; }
+
+        /* Dynamic Input List - Neumorphism */
+        .input-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+        .input-row { display: flex; gap: 8px; align-items: center; }
+        .input-row input { margin-bottom: 0; flex: 1; }
+        .input-row .remove-btn {
+            width: 32px; height: 32px; border-radius: 10px; border: none; background: var(--neu-bg);
+            color: var(--text-muted); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s; box-shadow: var(--neu-shadow-xs);
+        }
+        .input-row .remove-btn:hover { box-shadow: 2px 2px 4px rgba(163, 177, 198, 0.5), -2px -2px 4px rgba(255, 255, 255, 0.5); color: var(--text-primary); }
+        .input-row .remove-btn:active { box-shadow: var(--neu-inset-sm); }
+        .add-btn {
+            padding: 10px 16px; border-radius: 12px; border: none;
+            background: var(--neu-bg); color: var(--text-muted); cursor: pointer; font-size: 12px; font-weight: 600;
+            transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;
+            box-shadow: var(--neu-shadow-xs);
+        }
+        .add-btn:hover { box-shadow: 2px 2px 4px rgba(163, 177, 198, 0.5), -2px -2px 4px rgba(255, 255, 255, 0.5); color: var(--text-primary); }
+        .add-btn:active { box-shadow: var(--neu-inset-sm); }
+
+        /* Widget Appearance - Neumorphism */
+        .widget-frame {
+            width: 176px; height: 224px;
+            background: var(--neu-bg); border-radius: 29px;
+            overflow: hidden; display: flex; flex-direction: column;
+            border: none;
+            position: relative; transition: all 0.5s ease;
+            flex-shrink: 0;
+            box-shadow: var(--neu-shadow);
+        }
+        .widget-frame.with-shadow {
+            box-shadow: var(--neu-shadow);
+        }
+
+        .widget-bg-layer {
+            position: absolute; inset: 0;
+            background:
+                radial-gradient(circle at 80% 20%, var(--g1, transparent) 0%, transparent 50%),
+                radial-gradient(circle at 20% 80%, var(--g2, transparent) 0%, transparent 60%),
+                radial-gradient(circle at 50% 50%, var(--g3, transparent) 0%, transparent 70%);
+            opacity: var(--bg-opacity, 0); filter: blur(35px); z-index: 1; pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .widget-content {
+            flex: 1; display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between;
+            padding: 22px 19px; z-index: 2; position: relative;
+        }
+
+        .image-wrapper { position: relative; align-self: center; margin-bottom: 10px; }
+        .image-container {
+            width: 45px; height: 45px;
+            overflow: hidden; display: flex; align-items: center; justify-content: center;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.5), -4px -4px 8px rgba(255, 255, 255, 0.5);
+            background: var(--neu-bg);
+        }
+        .image-container img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.2s ease; }
+        .image-container.circle { border-radius: 50%; }
+        .image-container.square { border-radius: 11px; }
+
+        .image-tooltip {
+            position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%) translateY(-3px);
+            padding: 8px 14px; border-radius: 12px;
+            font-size: 11px; font-weight: 600; opacity: 0; pointer-events: none;
+            transition: all 0.3s ease;
+            width: max-content; max-width: 150px; text-align: center; line-height: 1.4;
+            white-space: normal; word-break: keep-all; z-index: 100;
+        }
+        .image-tooltip.dark {
+            background: rgba(58, 69, 86, 0.85); color: #e0e5ec;
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            box-shadow: 3px 3px 8px rgba(163, 177, 198, 0.4);
+        }
+        .image-tooltip.light {
+            background: rgba(255, 255, 255, 0.6); color: var(--text-primary);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            box-shadow: 3px 3px 8px rgba(163, 177, 198, 0.3);
+        }
+        .image-wrapper:hover .image-tooltip { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        .text-group { text-align: left; width: 100%; flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .dday-text { font-size: 12px; font-weight: 800; color: var(--text-primary); margin-bottom: 3px; }
+        .desc-text {
+            font-size: 9px; font-weight: 500; color: var(--text-secondary); line-height: 1.5;
+            word-break: break-word; overflow: hidden;
+            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+        }
+
+        .bottom-area { width: 100%; display: flex; justify-content: flex-end; align-items: center; margin-top: 6px; }
+
+        .confirm-btn {
+            padding: 6px 13px; border-radius: 8px;
+            background: var(--neu-bg); border: none; cursor: pointer;
+            font-size: 9px; font-weight: 700; color: var(--text-primary);
+            box-shadow: var(--neu-shadow-xs);
+            transition: all 0.15s ease;
+        }
+        .confirm-btn:hover { box-shadow: 2px 2px 4px rgba(163, 177, 198, 0.5), -2px -2px 4px rgba(255, 255, 255, 0.5); }
+        .confirm-btn:active { box-shadow: var(--neu-inset-sm); }
+
+        .particle {
+            position: absolute; pointer-events: none; font-size: 16px;
+            bottom: 40px; right: 35px;
+            animation: chimneyFlow 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            z-index: 10; text-align: center;
+        }
+        @keyframes chimneyFlow {
+            0% { transform: translate(0, 0) scale(0.4); opacity: 0; }
+            15% { opacity: 1; }
+            100% { transform: translate(var(--rand-x), -150px) scale(1.3) rotate(var(--rand-r)); opacity: 0; }
+        }
+
+        #toast {
+            position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%);
+            background: var(--text-primary); color: var(--neu-bg); padding: 14px 28px; border-radius: 16px;
+            font-size: 14px; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 200;
+            box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.5), -6px -6px 12px rgba(255, 255, 255, 0.3);
+        }
+        #toast.show { bottom: 40px; }
+
+        /* Utility buttons in forms - Neumorphism */
+        .neu-util-btn {
+            padding: 6px 12px; border-radius: 10px; border: none;
+            background: var(--neu-bg); color: var(--text-secondary); font-size: 11px; cursor: pointer;
+            box-shadow: var(--neu-shadow-xs); transition: all 0.2s;
+        }
+        .neu-util-btn:hover { box-shadow: 2px 2px 4px rgba(163, 177, 198, 0.5), -2px -2px 4px rgba(255, 255, 255, 0.5); }
+        .neu-util-btn:active { box-shadow: var(--neu-inset-sm); }
+
+        /* Checkbox label text */
+        .neu-check-label {
+            display: flex; align-items: center; gap: 8px; font-size: 12px;
+            color: var(--text-secondary); margin-bottom: 15px; cursor: pointer;
+        }
+
+        /* Inline label link */
+        .neu-link {
+            font-size: 10px; color: var(--text-muted); text-decoration: none;
+        }
+        .neu-link:hover { color: var(--text-primary); }
+
+        /* Slider row label */
+        .slider-label { font-size: 11px; color: var(--text-secondary); width: 35px; }
+        .slider-value { font-size: 11px; color: var(--text-muted); width: 35px; text-align: right; }
+
+        /* Embed Mode */
+        body.is-embed { background: transparent !important; padding: 12px !important; margin: 0 !important; min-height: auto !important; height: auto !important; overflow: visible !important; display: flex !important; align-items: center !important; justify-content: center !important; }
+        body.is-embed .main-container { display: contents; }
+        body.is-embed .window { display: none !important; }
+        body.is-embed #toast { display: none !important; }
+        html.is-embed { background: transparent !important; overflow: visible !important; }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="window" id="setupWindow">
+            <div class="title-bar">
+                <div class="dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="bar-title">Moment Cooker</div>
+                <div class="nav-controls">
+                    <button class="nav-btn" id="prevBtn" onclick="moveStep(-1)" disabled>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <button class="nav-btn" id="nextBtn" onclick="moveStep(1)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="content">
+                <div class="step active" id="step1">
+                    <h1>The Moment</h1>
+                    <p>Define the date and write down some stories of your memory. Multiple titles will show randomly on hover.</p>
+                    <label class="label-text">Titles</label>
+                    <div class="input-list" id="titleList">
+                        <div class="input-row">
+                            <input type="text" placeholder="Enter..." oninput="updatePreview()">
+                        </div>
+                    </div>
+                    <button class="add-btn" onclick="addTitleInput()">
+                        <span>+</span> Add another
+                    </button>
+                    <label class="label-text" style="margin-top: 15px;">Tooltip Style</label>
+                    <select id="tooltipStyleSelect" onchange="updatePreview()" style="margin-bottom: 15px;">
+                        <option value="dark">Dark</option>
+                        <option value="light">Light</option>
+                    </select>
+                    <label class="label-text">Date</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <input type="date" id="dateInput" onchange="updatePreview()" style="flex: 1; margin-bottom: 0;">
+                        <select id="dateDisplaySelect" onchange="updatePreview()" style="flex: 1; margin-bottom: 0;">
+                            <option value="dday">D-day</option>
+                            <option value="date">Date</option>
+                        </select>
+                    </div>
+                    <label class="label-text">Stories</label>
+                    <textarea id="descInput" placeholder="Enter..." oninput="updatePreview()"></textarea>
+                </div>
+
+                <div class="step" id="step2">
+                    <h1>Visual & Shape</h1>
+                    <p>Adjust the style and density of the backgrounds, and more!</p>
+                    <label class="label-text">Theme Color & Opacity</label>
+                    <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px;">
+                        <input type="color" id="themeColorPicker" value="#a4c4e4" oninput="updatePreview()">
+                        <input type="range" id="opacityRange" min="0" max="100" value="0" oninput="updatePreview()" style="flex: 1;">
+                    </div>
+                    <label class="label-text">Coloring Style</label>
+                    <select id="bgStyleSelect" onchange="updatePreview()" style="margin-bottom: 10px;">
+                        <option value="complementary">Watercolor(Complementary)</option>
+                        <option value="analogous">Soft(Analogous)</option>
+                        <option value="solid">Solid(One color)</option>
+                    </select>
+                    <label class="neu-check-label">
+                        <input type="checkbox" id="widgetShadowCheck" onchange="updatePreview()" checked>
+                        Please add some soft shadow!
+                    </label>
+                    <label class="label-text">Image Shape</label>
+                    <select id="shapeSelect" onchange="updatePreview()">
+                        <option value="circle">Circle</option>
+                        <option value="square" selected>Square</option>
+                    </select>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label class="label-text" style="margin-bottom: 0;">Image URL</label>
+                        <a href="https://postimages.org/" target="_blank" rel="noopener" class="neu-link">Get image URL &#8599;</a>
+                    </div>
+                    <input type="text" id="imageUrlInput" placeholder="https://i.postimg.cc/xxxxx.png" oninput="updatePreview()">
+                    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+                        <input type="file" id="fileInput" accept="image/*,image/gif" onchange="handleFileUpload(this)" style="flex: 1;">
+                        <button type="button" class="neu-util-btn" onclick="clearUploadedImage()">Clear</button>
+                    </div>
+
+                    <label class="label-text">Image Zoom & Position</label>
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px;">
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <span class="slider-label">Zoom</span>
+                            <input type="range" id="imgZoomRange" min="100" max="300" value="100" oninput="updatePreview()" style="flex: 1; margin: 0;">
+                            <span id="zoomValue" class="slider-value">1.0x</span>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <span class="slider-label">X</span>
+                            <input type="range" id="imgPosX" min="-50" max="50" value="0" step="0.5" oninput="updatePreview()" style="flex: 1; margin: 0;">
+                            <span style="width: 35px;"></span>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <span class="slider-label">Y</span>
+                            <input type="range" id="imgPosY" min="-50" max="50" value="0" step="0.5" oninput="updatePreview()" style="flex: 1; margin: 0;">
+                            <span style="width: 35px;"></span>
+                        </div>
+                        <div style="display: flex; justify-content: center; margin-top: 4px;">
+                            <button type="button" class="neu-util-btn" onclick="resetImagePos()" style="padding: 6px 20px; font-weight: 600;">
+                                Reset All Position
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step" id="step3">
+                    <h1>Interaction</h1>
+                    <p>Set the button label, color, and floating particles.</p>
+                    <label class="label-text">Button Label</label>
+                    <input type="text" id="btnTextInput" maxlength="8" placeholder="Button" oninput="updatePreview()">
+                    <label class="label-text">Button Color</label>
+                    <input type="color" id="btnColorPicker" value="#1d1d1f" oninput="updatePreview()" style="width: 100%; height: 40px; margin-bottom: 10px;">
+                    <label class="neu-check-label">
+                        <input type="checkbox" id="btnGradientCheck" onchange="updatePreview()">
+                        Please add some soft gradients!
+                    </label>
+                    <label class="label-text">Particles</label>
+                    <div class="input-list" id="particleList">
+                        <div class="input-row">
+                            <input type="text" placeholder="🤍" maxlength="4" oninput="updatePreview()">
+                        </div>
+                    </div>
+                    <button class="add-btn" onclick="addParticleInput()">
+                        <span>+</span> Add another particle.
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="widget-frame with-shadow" id="wFrame">
+            <div class="widget-bg-layer" id="bgLayer"></div>
+            <div class="widget-content">
+                <div class="image-wrapper">
+                    <div class="image-tooltip dark" id="wTooltip">Our First Encounter</div>
+                    <div class="image-container square" id="imgContainer">
+                        <img id="wImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a4c4e4'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E">
+                    </div>
+                </div>
+                <div class="text-group">
+                    <div id="wDday" class="dday-text">D+0</div>
+                    <div id="wDesc" class="desc-text" style="white-space: pre-wrap;">Stories appear here.</div>
+                </div>
+                <div class="bottom-area">
+                    <button class="confirm-btn" id="actionBtn" onclick="spawnParticles()">Button</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">Copied! /embed to your Notion.</div>
+
+<script>
+    let currentStep = 1;
+    let uploadedImageData = "";
+    let titles = ["Our First Encounter"];
+    let particles = ["🤍"];
+    const params = new URLSearchParams(window.location.search);
+
+    function getComplementaryColors(hex) {
+        const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+        return [`rgba(${r}, ${g}, ${b}, 1)`, `rgba(${(r+40)%255}, ${(g+20)%255}, ${(b+60)%255}, 0.6)`, `rgba(${(r+100)%255}, ${(g+40)%255}, ${(b+20)%255}, 0.5)`];
+    }
+
+    function getAnalogousColors(hex) {
+        const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+        const warm1 = { r: Math.min(255, r + 30), g: Math.max(0, g - 10), b: Math.max(0, b - 20) };
+        const cool1 = { r: Math.max(0, r - 20), g: Math.min(255, g + 15), b: Math.min(255, b + 30) };
+        return [`rgba(${r}, ${g}, ${b}, 1)`, `rgba(${warm1.r}, ${warm1.g}, ${warm1.b}, 0.7)`, `rgba(${cool1.r}, ${cool1.g}, ${cool1.b}, 0.6)`];
+    }
+
+    function getSolidColor(hex) {
+        const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+        return [`rgba(${r}, ${g}, ${b}, 1)`, `rgba(${r}, ${g}, ${b}, 1)`, `rgba(${r}, ${g}, ${b}, 1)`];
+    }
+
+    function getBackgroundColors(hex, style) {
+        switch(style) {
+            case 'analogous': return getAnalogousColors(hex);
+            case 'solid': return getSolidColor(hex);
+            default: return getComplementaryColors(hex);
+        }
+    }
+
+    function getContrastYIQ(hex){
+        hex = hex.replace("#", "");
+        var r = parseInt(hex.substr(0,2),16), g = parseInt(hex.substr(2,2),16), b = parseInt(hex.substr(4,2),16);
+        return (((r*299)+(g*587)+(b*114))/1000 >= 128) ? '#1d1d1f' : '#ffffff';
+    }
+
+    function handleFileUpload(input) {
+        const file = input.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => { uploadedImageData = e.target.result; updatePreview(); };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function clearUploadedImage() {
+        uploadedImageData = "";
+        document.getElementById('fileInput').value = "";
+        document.getElementById('imageUrlInput').value = "";
+        document.getElementById('wImg').src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a4c4e4'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E";
+        resetImagePos();
+    }
+
+    function resetImagePos() {
+        document.getElementById('imgZoomRange').value = 100;
+        document.getElementById('imgPosX').value = 0;
+        document.getElementById('imgPosY').value = 0;
+        updatePreview();
+    }
+
+    function addTitleInput() {
+        const list = document.getElementById('titleList');
+        const row = document.createElement('div');
+        row.className = 'input-row';
+        row.innerHTML = `<input type="text" placeholder="Another memory title..." oninput="updatePreview()"><button class="remove-btn" onclick="removeInput(this)">×</button>`;
+        list.appendChild(row);
+        row.querySelector('input').focus();
+    }
+
+    function addParticleInput() {
+        const list = document.getElementById('particleList');
+        const row = document.createElement('div');
+        row.className = 'input-row';
+        row.innerHTML = `<input type="text" placeholder="🤍" maxlength="4" oninput="updatePreview()"><button class="remove-btn" onclick="removeInput(this)">×</button>`;
+        list.appendChild(row);
+        row.querySelector('input').focus();
+    }
+
+    function removeInput(btn) {
+        const row = btn.parentElement;
+        const list = row.parentElement;
+        if (list.children.length > 1) { row.remove(); updatePreview(); }
+    }
+
+    function getTitles() {
+        const inputs = document.querySelectorAll('#titleList input');
+        return Array.from(inputs).map(i => i.value.trim()).filter(v => v.length > 0);
+    }
+
+    function getParticles() {
+        const inputs = document.querySelectorAll('#particleList input');
+        return Array.from(inputs).map(i => i.value.trim()).filter(v => v.length > 0);
+    }
+
+    function getRandomItem(arr) {
+        if (arr.length === 0) return null;
+        return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function spawnParticles() {
+        const particleArr = params.get('embed') ? particles : getParticles();
+        const emoji = getRandomItem(particleArr) || "🤍";
+        const p = document.createElement('div');
+        p.className = 'particle'; p.innerText = emoji;
+        const rx = (Math.random() - 0.5) * 80, rr = (Math.random() - 0.5) * 70;
+        p.style.setProperty('--rand-x', `${rx}px`); p.style.setProperty('--rand-r', `${rr}deg`);
+        document.getElementById('wFrame').appendChild(p);
+        setTimeout(() => p.remove(), 2500);
+    }
+
+    function setupRandomTooltip() {
+        const wrapper = document.querySelector('.image-wrapper');
+        const tooltip = document.getElementById('wTooltip');
+        wrapper.addEventListener('mouseenter', () => {
+            const titleArr = params.get('embed') ? titles : getTitles();
+            const randomTitle = getRandomItem(titleArr) || "Our First Encounter";
+            tooltip.innerText = randomTitle;
+        });
+    }
+
+    function updatePreview() {
+        const titleArr = getTitles();
+        const desc = document.getElementById('descInput').value || "Stories appear here.";
+        const themeColor = document.getElementById('themeColorPicker').value;
+        const opacity = document.getElementById('opacityRange').value / 100;
+        const bgStyle = document.getElementById('bgStyleSelect').value;
+        const widgetShadow = document.getElementById('widgetShadowCheck').checked;
+        const tooltipStyle = document.getElementById('tooltipStyleSelect').value;
+        const btnText = document.getElementById('btnTextInput').value || "Button";
+        const btnColor = document.getElementById('btnColorPicker').value;
+        const btnGradient = document.getElementById('btnGradientCheck').checked;
+        const shape = document.getElementById('shapeSelect').value;
+        const imageUrl = document.getElementById('imageUrlInput').value;
+        const dateVal = document.getElementById('dateInput').value;
+
+        const wFrame = document.getElementById('wFrame');
+        wFrame.classList.toggle('with-shadow', widgetShadow);
+
+        const tooltip = document.getElementById('wTooltip');
+        tooltip.innerText = titleArr[0] || "Our First Encounter";
+        tooltip.className = `image-tooltip ${tooltipStyle}`;
+
+        document.getElementById('wDesc').innerText = desc;
+
+        const bgLayer = document.getElementById('bgLayer');
+        if (opacity > 0) {
+            if (bgStyle === 'solid') {
+                bgLayer.style.background = themeColor;
+                bgLayer.style.filter = 'none';
+            } else {
+                const colors = getBackgroundColors(themeColor, bgStyle);
+                bgLayer.style.background = `radial-gradient(circle at 80% 20%, ${colors[0]} 0%, transparent 50%), radial-gradient(circle at 20% 80%, ${colors[1]} 0%, transparent 60%), radial-gradient(circle at 50% 50%, ${colors[2]} 0%, transparent 70%)`;
+                bgLayer.style.filter = 'blur(35px)';
+            }
+            bgLayer.style.opacity = opacity;
+        } else { bgLayer.style.opacity = 0; }
+
+        const dateDisplay = document.getElementById('dateDisplaySelect').value;
+        if (dateVal) {
+            if (dateDisplay === 'date') {
+                const d = new Date(dateVal);
+                document.getElementById('wDday').innerText = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+            } else {
+                const diff = Math.floor((new Date().setHours(0,0,0,0) - new Date(dateVal).setHours(0,0,0,0)) / 86400000);
+                document.getElementById('wDday').innerText = diff >= 0 ? `D+${diff}` : `D${diff}`;
+            }
+        } else {
+            document.getElementById('wDday').innerText = dateDisplay === 'date' ? '0000.00.00' : 'D+0';
+        }
+
+        document.getElementById('imgContainer').className = `image-container ${shape}`;
+        if (uploadedImageData) document.getElementById('wImg').src = uploadedImageData;
+        else if (imageUrl) document.getElementById('wImg').src = imageUrl;
+
+        const imgZoom = document.getElementById('imgZoomRange').value / 100;
+        const imgPosX = document.getElementById('imgPosX').value;
+        const imgPosY = document.getElementById('imgPosY').value;
+        document.getElementById('zoomValue').innerText = imgZoom.toFixed(1) + 'x';
+        document.getElementById('wImg').style.transform = `scale(${imgZoom}) translate(${imgPosX / imgZoom}%, ${imgPosY / imgZoom}%)`;
+
+        const btn = document.getElementById('actionBtn');
+        btn.innerText = btnText;
+        btn.style.color = getContrastYIQ(btnColor);
+        if (btnGradient) {
+            const colors = getAnalogousColors(btnColor);
+            btn.style.background = `linear-gradient(135deg, ${btnColor} 0%, ${colors[1]} 100%)`;
+        } else { btn.style.background = btnColor; }
+    }
+
+    if (params.get('embed')) {
+        document.body.classList.add('is-embed');
+        document.documentElement.classList.add('is-embed');
+        const apply = () => {
+            const titlesParam = params.get('t');
+            if (titlesParam) { try { titles = decodeURIComponent(atob(titlesParam)).split('|').filter(t => t.length > 0); } catch(e) { titles = ["💬"]; } }
+            const particlesParam = params.get('p');
+            if (particlesParam) { try { particles = decodeURIComponent(atob(particlesParam)).split('|').filter(p => p.length > 0); } catch(e) { particles = ["🤍"]; } }
+
+            const ds = params.get('ds') ? decodeURIComponent(atob(params.get('ds'))) : "";
+            const th = "#" + (params.get('th') || "1d1d1f");
+            const op = params.get('op') || "0";
+            const bgStyle = params.get('bs') || "complementary";
+            const widgetShadow = params.get('ws') !== '0';
+            const imgUrl = params.get('img') ? decodeURIComponent(atob(params.get('img'))) : "";
+
+            document.getElementById('wFrame').classList.toggle('with-shadow', widgetShadow);
+            document.getElementById('wTooltip').innerText = titles[0] || "Our First Encounter";
+            document.getElementById('wDesc').innerText = ds || "";
+
+            if(params.get('d')) {
+                const dateDisplay = params.get('dd') || 'dday';
+                if (dateDisplay === 'date') {
+                    const d = new Date(params.get('d'));
+                    document.getElementById('wDday').innerText = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+                } else {
+                    const diff = Math.floor((new Date().setHours(0,0,0,0) - new Date(params.get('d')).setHours(0,0,0,0)) / 86400000);
+                    document.getElementById('wDday').innerText = diff >= 0 ? `D+${diff}` : `D${diff}`;
+                }
+            }
+
+            const bg = document.getElementById('bgLayer');
+            if (bgStyle === 'solid') { bg.style.background = th; bg.style.filter = 'none'; }
+            else {
+                const colors = getBackgroundColors(th, bgStyle);
+                bg.style.background = `radial-gradient(circle at 80% 20%, ${colors[0]} 0%, transparent 50%), radial-gradient(circle at 20% 80%, ${colors[1]} 0%, transparent 60%), radial-gradient(circle at 50% 50%, ${colors[2]} 0%, transparent 70%)`;
+                bg.style.filter = 'blur(35px)';
+            }
+            bg.style.opacity = op;
+
+            const tooltipStyle = params.get('ts') || 'dark';
+            document.getElementById('wTooltip').className = `image-tooltip ${tooltipStyle}`;
+
+            const btn = document.getElementById('actionBtn');
+            const btnColor = "#" + (params.get('bc') || "1d1d1f");
+            const btnGradient = params.get('bg') === '1';
+            btn.innerText = params.get('bt') ? decodeURIComponent(atob(params.get('bt'))) : "Button";
+            btn.style.color = getContrastYIQ(btnColor);
+            if (btnGradient) {
+                const colors = getAnalogousColors(btnColor);
+                btn.style.background = `linear-gradient(135deg, ${btnColor} 0%, ${colors[1]} 100%)`;
+            } else { btn.style.background = btnColor; }
+
+            document.getElementById('imgContainer').className = `image-container ${params.get('s') || "square"}`;
+            if (imgUrl) document.getElementById('wImg').src = imgUrl;
+
+            const imgZoom = (params.get('iz') || 100) / 100;
+            const imgPosX = params.get('ix') || 0;
+            const imgPosY = params.get('iy') || 0;
+            document.getElementById('wImg').style.transform = `scale(${imgZoom}) translate(${imgPosX / imgZoom}%, ${imgPosY / imgZoom}%)`;
+        };
+        apply();
+        setupRandomTooltip();
+    }
+
+    async function moveStep(n) {
+        if (currentStep + n === 4) {
+            const titleArr = getTitles();
+            const t = btoa(encodeURIComponent(titleArr.join('|')));
+            const d = document.getElementById('dateInput').value;
+            const dd = document.getElementById('dateDisplaySelect').value;
+            const ds = btoa(encodeURIComponent(document.getElementById('descInput').value));
+            const th = (document.getElementById('themeColorPicker').value).replace('#', '');
+            const op = document.getElementById('opacityRange').value / 100;
+            const bs = document.getElementById('bgStyleSelect').value;
+            const ws = document.getElementById('widgetShadowCheck').checked ? '1' : '0';
+            const ts = document.getElementById('tooltipStyleSelect').value;
+            const bt = btoa(encodeURIComponent(document.getElementById('btnTextInput').value));
+            const bc = (document.getElementById('btnColorPicker').value).replace('#', '');
+            const bg = document.getElementById('btnGradientCheck').checked ? '1' : '0';
+            const particleArr = getParticles();
+            const p = btoa(encodeURIComponent(particleArr.join('|')));
+            const s = document.getElementById('shapeSelect').value;
+            const imageUrl = document.getElementById('imageUrlInput').value;
+            const img = imageUrl ? btoa(encodeURIComponent(imageUrl)) : "";
+            const iz = document.getElementById('imgZoomRange').value;
+            const ix = document.getElementById('imgPosX').value;
+            const iy = document.getElementById('imgPosY').value;
+
+            let url = `${window.location.origin}${window.location.pathname}?embed=true&t=${t}&d=${d}&dd=${dd}&ds=${ds}&th=${th}&op=${op}&bs=${bs}&ws=${ws}&ts=${ts}&bt=${bt}&bc=${bc}&bg=${bg}&p=${p}&s=${s}`;
+            if (img) url += `&img=${img}`;
+            if (iz !== '100' || ix !== '0' || iy !== '0') url += `&iz=${iz}&ix=${ix}&iy=${iy}`;
+
+            await navigator.clipboard.writeText(url);
+            document.getElementById('toast').classList.add('show');
+            setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
+            return;
+        }
+        document.getElementById(`step${currentStep}`).classList.remove('active');
+        currentStep += n;
+        document.getElementById(`step${currentStep}`).classList.add('active');
+        document.getElementById('prevBtn').disabled = (currentStep === 1);
+    }
+
+    window.onload = () => { if (!params.get('embed')) { updatePreview(); setupRandomTooltip(); } };
+</script>
+</body>
+</html>
