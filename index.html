@@ -380,6 +380,10 @@
                     <div id="widgetBgCustomRow" style="display: none; margin-bottom: 12px;">
                         <input type="color" id="widgetBgColorPicker" value="#ffffff" oninput="updatePreview()" style="width: 100%; height: 40px;">
                     </div>
+                    <label class="neu-check-label">
+                        <input type="checkbox" id="widgetFrameBgCheck" onchange="updatePreview()">
+                        Apply to widget background too
+                    </label>
                     <label class="label-text">Image Shape</label>
                     <select id="shapeSelect" onchange="updatePreview()">
                         <option value="circle">Circle</option>
@@ -618,7 +622,13 @@
         const imageUrl = document.getElementById('imageUrlInput').value;
         const dateVal = document.getElementById('dateInput').value;
 
+        const widgetBgColor = getWidgetBgColor();
+        const applyToFrame = document.getElementById('widgetFrameBgCheck').checked;
+
+        document.body.style.background = widgetBgColor || '';
+
         const wFrame = document.getElementById('wFrame');
+        wFrame.style.background = (applyToFrame && widgetBgColor) ? widgetBgColor : '';
         wFrame.classList.toggle('with-shadow', widgetShadow);
 
         const tooltip = document.getElementById('wTooltip');
@@ -693,6 +703,9 @@
                 const bgColor = '#' + wbg;
                 document.documentElement.style.background = bgColor;
                 document.body.style.background = bgColor;
+            }
+            if (params.get('wfb') === '1' && wbg) {
+                document.getElementById('wFrame').style.background = '#' + wbg;
             }
 
             document.getElementById('wFrame').classList.toggle('with-shadow', widgetShadow);
@@ -770,11 +783,13 @@
 
             const wbgColor = getWidgetBgColor();
             const wbg = wbgColor ? wbgColor.replace('#', '') : '';
+            const wfb = document.getElementById('widgetFrameBgCheck').checked ? '1' : '0';
 
             let url = `${window.location.origin}${window.location.pathname}?embed=true&t=${t}&d=${d}&dd=${dd}&ds=${ds}&th=${th}&op=${op}&bs=${bs}&ws=${ws}&ts=${ts}&bt=${bt}&bc=${bc}&bg=${bg}&p=${p}&s=${s}`;
             if (img) url += `&img=${img}`;
             if (iz !== '100' || ix !== '0' || iy !== '0') url += `&iz=${iz}&ix=${ix}&iy=${iy}`;
             if (wbg) url += `&wbg=${wbg}`;
+            if (wbg && wfb === '1') url += `&wfb=1`;
 
             await navigator.clipboard.writeText(url);
             document.getElementById('toast').classList.add('show');
