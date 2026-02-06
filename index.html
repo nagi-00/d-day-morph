@@ -701,8 +701,8 @@
             const wbg = params.get('wbg');
             if (wbg) {
                 const bgColor = '#' + wbg;
-                document.documentElement.style.background = bgColor;
-                document.body.style.background = bgColor;
+                document.documentElement.style.setProperty('background', bgColor, 'important');
+                document.body.style.setProperty('background', bgColor, 'important');
             }
             if (params.get('wfb') === '1' && wbg) {
                 document.getElementById('wFrame').style.background = '#' + wbg;
