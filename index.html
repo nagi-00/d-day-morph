@@ -389,6 +389,8 @@
                         <option value="circle">Circle</option>
                         <option value="square" selected>Square</option>
                     </select>
+                    <label class="label-text">Default Image Color</label>
+                    <input type="color" id="defaultImgColorPicker" value="#a4c4e4" oninput="updatePreview()" style="width: 100%; height: 40px; margin-bottom: 10px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <label class="label-text" style="margin-bottom: 0;">Image URL</label>
                         <a href="https://postimages.org/" target="_blank" rel="noopener" class="neu-link">Get image URL &#8599;</a>
@@ -522,6 +524,11 @@
         };
     }
 
+    function getHeartSvg(hex) {
+        const c = hex.replace('#', '%23');
+        return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='${c}'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E`;
+    }
+
     function onWidgetBgChange() {
         const sel = document.getElementById('widgetBgSelect').value;
         document.getElementById('widgetBgCustomRow').style.display = sel === 'custom' ? 'block' : 'none';
@@ -550,7 +557,7 @@
         uploadedImageData = "";
         document.getElementById('fileInput').value = "";
         document.getElementById('imageUrlInput').value = "";
-        document.getElementById('wImg').src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a4c4e4'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E";
+        document.getElementById('wImg').src = getHeartSvg(document.getElementById('defaultImgColorPicker').value);
         resetImagePos();
     }
 
@@ -687,8 +694,10 @@
         }
 
         document.getElementById('imgContainer').className = `image-container ${shape}`;
+        const defaultImgColor = document.getElementById('defaultImgColorPicker').value;
         if (uploadedImageData) document.getElementById('wImg').src = uploadedImageData;
         else if (imageUrl) document.getElementById('wImg').src = imageUrl;
+        else document.getElementById('wImg').src = getHeartSvg(defaultImgColor);
 
         const imgZoom = document.getElementById('imgZoomRange').value / 100;
         const imgPosX = document.getElementById('imgPosX').value;
@@ -780,6 +789,10 @@
 
             document.getElementById('imgContainer').className = `image-container ${params.get('s') || "square"}`;
             if (imgUrl) document.getElementById('wImg').src = imgUrl;
+            else {
+                const ic = params.get('ic');
+                if (ic) document.getElementById('wImg').src = getHeartSvg('#' + ic);
+            }
 
             const imgZoom = (params.get('iz') || 100) / 100;
             const imgPosX = params.get('ix') || 0;
@@ -817,12 +830,14 @@
             const wbgColor = getWidgetBgColor();
             const wbg = wbgColor ? wbgColor.replace('#', '') : '';
             const wfb = document.getElementById('widgetFrameBgCheck').checked ? '1' : '0';
+            const ic = document.getElementById('defaultImgColorPicker').value.replace('#', '');
 
             let url = `${window.location.origin}${window.location.pathname}?embed=true&t=${t}&d=${d}&dd=${dd}&ds=${ds}&th=${th}&op=${op}&bs=${bs}&ws=${ws}&ts=${ts}&bt=${bt}&bc=${bc}&bg=${bg}&p=${p}&s=${s}`;
             if (img) url += `&img=${img}`;
             if (iz !== '100' || ix !== '0' || iy !== '0') url += `&iz=${iz}&ix=${ix}&iy=${iy}`;
             if (wbg) url += `&wbg=${wbg}`;
             if (wbg && wfb === '1') url += `&wfb=1`;
+            if (!img && ic !== 'a4c4e4') url += `&ic=${ic}`;
 
             await navigator.clipboard.writeText(url);
             document.getElementById('toast').classList.add('show');
