@@ -618,10 +618,7 @@
         const imageUrl = document.getElementById('imageUrlInput').value;
         const dateVal = document.getElementById('dateInput').value;
 
-        const widgetBgColor = getWidgetBgColor();
-
         const wFrame = document.getElementById('wFrame');
-        wFrame.style.background = widgetBgColor || '';
         wFrame.classList.toggle('with-shadow', widgetShadow);
 
         const tooltip = document.getElementById('wTooltip');
@@ -693,7 +690,9 @@
 
             const wbg = params.get('wbg');
             if (wbg) {
-                document.getElementById('wFrame').style.background = '#' + wbg;
+                const bgColor = '#' + wbg;
+                document.documentElement.style.background = bgColor;
+                document.body.style.background = bgColor;
             }
 
             document.getElementById('wFrame').classList.toggle('with-shadow', widgetShadow);
