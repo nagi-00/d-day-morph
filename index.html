@@ -631,6 +631,11 @@
         wFrame.style.background = (applyToFrame && widgetBgColor) ? widgetBgColor : '';
         wFrame.classList.toggle('with-shadow', widgetShadow);
 
+        const frameBg = (applyToFrame && widgetBgColor) ? widgetBgColor : '#E8ECEF';
+        const isDarkFrame = getContrastYIQ(frameBg) === '#ffffff';
+        document.getElementById('wDday').style.color = isDarkFrame ? '#f0f0f0' : '';
+        document.getElementById('wDesc').style.color = isDarkFrame ? '#c8c8c8' : '';
+
         const tooltip = document.getElementById('wTooltip');
         tooltip.innerText = titleArr[0] || "Our First Encounter";
         tooltip.className = `image-tooltip ${tooltipStyle}`;
@@ -705,7 +710,12 @@
                 document.body.style.setProperty('background', bgColor, 'important');
             }
             if (params.get('wfb') === '1' && wbg) {
-                document.getElementById('wFrame').style.background = '#' + wbg;
+                const frameBgColor = '#' + wbg;
+                document.getElementById('wFrame').style.background = frameBgColor;
+                if (getContrastYIQ(frameBgColor) === '#ffffff') {
+                    document.getElementById('wDday').style.color = '#f0f0f0';
+                    document.getElementById('wDesc').style.color = '#c8c8c8';
+                }
             }
 
             document.getElementById('wFrame').classList.toggle('with-shadow', widgetShadow);
