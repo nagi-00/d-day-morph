@@ -370,6 +370,16 @@
                         <input type="checkbox" id="widgetShadowCheck" onchange="updatePreview()" checked>
                         Please add some soft shadow!
                     </label>
+                    <label class="label-text">Widget Background</label>
+                    <select id="widgetBgSelect" onchange="onWidgetBgChange(); updatePreview()" style="margin-bottom: 10px;">
+                        <option value="default">Default (#E8ECEF)</option>
+                        <option value="notion-light">Notion Light (#FFFFFF)</option>
+                        <option value="notion-dark">Notion Dark (#191919)</option>
+                        <option value="custom">Custom Color</option>
+                    </select>
+                    <div id="widgetBgCustomRow" style="display: none; margin-bottom: 12px;">
+                        <input type="color" id="widgetBgColorPicker" value="#ffffff" oninput="updatePreview()" style="width: 100%; height: 40px;">
+                    </div>
                     <label class="label-text">Image Shape</label>
                     <select id="shapeSelect" onchange="updatePreview()">
                         <option value="circle">Circle</option>
@@ -494,6 +504,21 @@
         return (((r*299)+(g*587)+(b*114))/1000 >= 128) ? '#1d1d1f' : '#ffffff';
     }
 
+    function onWidgetBgChange() {
+        const sel = document.getElementById('widgetBgSelect').value;
+        document.getElementById('widgetBgCustomRow').style.display = sel === 'custom' ? 'block' : 'none';
+    }
+
+    function getWidgetBgColor() {
+        const sel = document.getElementById('widgetBgSelect').value;
+        switch(sel) {
+            case 'notion-light': return '#ffffff';
+            case 'notion-dark': return '#191919';
+            case 'custom': return document.getElementById('widgetBgColorPicker').value;
+            default: return '';
+        }
+    }
+
     function handleFileUpload(input) {
         const file = input.files[0];
         if (file) {
@@ -593,7 +618,10 @@
         const imageUrl = document.getElementById('imageUrlInput').value;
         const dateVal = document.getElementById('dateInput').value;
 
+        const widgetBgColor = getWidgetBgColor();
+
         const wFrame = document.getElementById('wFrame');
+        wFrame.style.background = widgetBgColor || '';
         wFrame.classList.toggle('with-shadow', widgetShadow);
 
         const tooltip = document.getElementById('wTooltip');
@@ -662,6 +690,11 @@
             const bgStyle = params.get('bs') || "complementary";
             const widgetShadow = params.get('ws') !== '0';
             const imgUrl = params.get('img') ? decodeURIComponent(atob(params.get('img'))) : "";
+
+            const wbg = params.get('wbg');
+            if (wbg) {
+                document.getElementById('wFrame').style.background = '#' + wbg;
+            }
 
             document.getElementById('wFrame').classList.toggle('with-shadow', widgetShadow);
             document.getElementById('wTooltip').innerText = titles[0] || "Our First Encounter";
@@ -736,9 +769,13 @@
             const ix = document.getElementById('imgPosX').value;
             const iy = document.getElementById('imgPosY').value;
 
+            const wbgColor = getWidgetBgColor();
+            const wbg = wbgColor ? wbgColor.replace('#', '') : '';
+
             let url = `${window.location.origin}${window.location.pathname}?embed=true&t=${t}&d=${d}&dd=${dd}&ds=${ds}&th=${th}&op=${op}&bs=${bs}&ws=${ws}&ts=${ts}&bt=${bt}&bc=${bc}&bg=${bg}&p=${p}&s=${s}`;
             if (img) url += `&img=${img}`;
             if (iz !== '100' || ix !== '0' || iy !== '0') url += `&iz=${iz}&ix=${ix}&iy=${iy}`;
+            if (wbg) url += `&wbg=${wbg}`;
 
             await navigator.clipboard.writeText(url);
             document.getElementById('toast').classList.add('show');
